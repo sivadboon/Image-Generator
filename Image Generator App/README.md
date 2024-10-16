@@ -31,7 +31,7 @@ First, clone this repository to your local machine:
 
 ```bash
 git clone https://github.com/sivadboon/Image-Generator.git
-cd image-generator
+cd Image-Generator
 ```
 
 ### Step 2: Create a Virtual Environment (Optional but Recommended)
