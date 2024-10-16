@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            flex-direction: column;
+        }
+
+        .countdown {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            height: 60px;
+            padding: 15px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+            font-size: 1.1rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+            font-size: 1.1rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .generate-button {
+            flex: 1;
+            background-color: #4caf50;
+            border: none;
+            color: #fff;
+            font-size: 1.4rem;
+            padding: 15px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s;
+            text-align: center;
+        }
+
+        .generate-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .mic-button {
+            width: 50px;
+            height: 50px;
+            background-color: #ff4081;
+            border: none;
+            color: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+
+        .mic-button:hover {
+            background-color: #f50057;
+            transform: scale(1.1);
+        }
+
+        .loading-spinner {
+            display: none;
+            margin-top: 20px;
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid #fff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            input[type="text"], select {
+                height: 50px;
+                font-size: 1rem;
+            }
+
+            .generate-button {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+
+    <script>
+        function startListening() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                console.log("Voice recognition started. Speak into the microphone.");
+            };
+
+            recognition.onspeechend = () => {
+                recognition.stop();
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('description').value = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+            };
+
+            recognition.start();
+        }
+
+        function showLoading() {
+            document.getElementById('submit-button').style.display = 'none';
+            document.querySelector('.mic-button').style.display = 'none'; // Hide mic button
+            document.querySelector('.loading-spinner').style.display = 'block';
+
+            const imageCount = parseInt(document.getElementById('image_count').value);
+            const estimatedTime = imageCount * 13;
+
+            const countdownElement = document.querySelector('.countdown');
+            countdownElement.style.display = 'block';
+            startCountdown(estimatedTime, countdownElement);
+        }
+
+        function startCountdown(duration, display) {
+            let remainingTime = duration;
+            display.textContent = `Time Remaining: ${remainingTime} Seconds`;
+
+            const countdownInterval = setInterval(() => {
+                remainingTime--;
+                display.textContent = `Time Remaining: ${remainingTime} Seconds`;
+
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    display.textContent = 'Processing...';
+                }
+            }, 1000);
+        }
+    </script>
+</head>
+<body>
+    <div class="countdown"></div>
+
+    <div class="container">
+        <h1>Generate an Image</h1>
+        <form action="/generate" method="POST" onsubmit="showLoading()">
+            <input type="text" id="description" name="description" placeholder="Enter a description..." required>
+
+            <label for="image_count">Select Number of Images:</label>
+            <select id="image_count" name="image_count" required>
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+
+            <div class="button-container">
+                <button type="submit" class="generate-button" id="submit-button">Generate Image(s)</button>
+                <button type="button" class="mic-button" onclick="startListening()">🎤</button>
+            </div>
+
+            <div class="loading-spinner"></div>
+        </form>
+        <footer>Powered by OpenAI DALL-E</footer>
+    </div>
+</body>
+</html>
