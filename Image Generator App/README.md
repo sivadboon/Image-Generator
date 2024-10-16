@@ -8,8 +8,6 @@ A user-friendly web application built with **Flask** that leverages the **OpenAI
 - **Text-to-Image Generation**: Users can input a description and generate images based on the text provided using OpenAI's API.
 - **Speech-to-Text Integration**: 🎤 Users can also speak their description using the Web Speech API, and the app will convert it into text for generating the image.
 - **Multiple Image Generation**: Users can select the number of images (up to 4) they want to generate.
-- **Countdown Timer**: A real-time countdown shows the estimated time remaining for image generation, enhancing the user experience.
-- **Loading Spinner**: A loading animation is displayed during the image generation process to keep users informed.
 - **Responsive Design**: The app is designed to work across desktop and mobile devices.
 
 ## Tech Stack
@@ -32,7 +30,7 @@ A user-friendly web application built with **Flask** that leverages the **OpenAI
 First, clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/yourusername/image-generator.git
+git clone https://github.com/sivadboon/Image-Generator.git
 cd image-generator
 ```
 
